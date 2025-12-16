@@ -1,4 +1,4 @@
-// Объявление типов для Telegram WebApp
+// Telegram WebApp Types
 declare global {
   interface Window {
     Telegram?: {
@@ -9,9 +9,9 @@ declare global {
         expand: () => void;
         setHeaderColor: (color: string) => void;
         setBackgroundColor: (color: string) => void;
-        // Функция оплаты:
+        // Payment function
         openInvoice: (url: string, callback?: (status: string) => void) => void;
-        // Вибрация:
+        // Haptic Feedback
         HapticFeedback: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
@@ -21,10 +21,10 @@ declare global {
   }
 }
 
-// Экспорт объекта WebApp для удобства
+// Export WebApp object
 export const tg = window.Telegram?.WebApp;
 
-// Инициализация (расширяем на весь экран)
+// Initialize (expand to full screen)
 export const initTelegram = () => {
   if (tg) {
     tg.ready();
@@ -36,18 +36,18 @@ export const initTelegram = () => {
   }
 };
 
-// Вибрация (для приятных ощущений при клике)
+// Haptic feedback helper
 export const hapticImpact = (style: 'light' | 'medium' | 'heavy' = 'light') => {
   if (tg?.HapticFeedback) {
     tg.HapticFeedback.impactOccurred(style);
   }
 };
 
-// --- ГЛАВНАЯ ФУНКЦИЯ ОПЛАТЫ ---
+// --- REAL PAYMENT FUNCTION ---
 export const buyStars = async (amount: number, title: string, description: string): Promise<boolean> => {
   return new Promise(async (resolve) => {
     
-    // 1. Проверка: если открыто не в Телеграме, оплата не сработает
+    // 1. Environment check
     if (!tg || !tg.initData) {
       alert("Payment is only available inside Telegram!");
       resolve(false);
@@ -55,45 +55,52 @@ export const buyStars = async (amount: number, title: string, description: strin
     }
 
     try {
-      // 2. Запрашиваем ссылку на оплату у вашего сервера (Vercel)
-      const response = await fetch('/api/pay', {
+      // 2. Request Invoice Link from YOUR Backend
+      // The endpoint /api/create-invoice handles the Bot API call securely
+      const response = await fetch('/api/create-invoice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: title,             // Name (e.g. "Energy Technique")
-          description: description, // Description
-          price: amount             // Price in Stars
+          title: title,
+          description: description,
+          price: amount,
+          initData: tg.initData 
         }),
       });
 
       const data = await response.json();
 
-      if (!data.link) {
-        console.error("Error: Server did not return link", data);
-        alert("Error creating invoice. Please try again later.");
+      if (!response.ok || !data.invoiceLink) {
+        console.error("Payment API Error:", data);
+        alert("Could not initialize payment. Please try again later.");
         resolve(false);
         return;
       }
 
-      // 3. Открываем нативное окно оплаты Telegram
-      tg.openInvoice(data.link, (status: string) => {
-        // status может быть 'paid', 'cancelled', 'failed', 'pending'
+      // 3. Open Telegram Native Invoice
+      tg.openInvoice(data.invoiceLink, (status: string) => {
+        // status: 'paid', 'cancelled', 'failed', 'pending'
+        console.log(`Invoice status: ${status}`);
+        
         if (status === 'paid') {
-          // Успех! Вибрируем телефоном
           if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
           resolve(true);
-        } else {
-          // Отмена или ошибка
+        } else if (status === 'failed') {
           if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+          alert("Payment failed.");
+          resolve(false);
+        } else {
+          // Cancelled or Pending
+          if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
           resolve(false);
         }
       });
 
     } catch (error) {
-      console.error("Network error:", error);
-      alert("Network Error");
+      console.error("Network Error:", error);
+      alert("Network error. Please check your internet connection.");
       resolve(false);
     }
   });
