@@ -1,4 +1,4 @@
-// Mocking the Telegram WebApp type for development outside Telegram
+// Объявление типов для Telegram WebApp
 declare global {
   interface Window {
     Telegram?: {
@@ -7,64 +7,92 @@ declare global {
         initDataUnsafe: any;
         ready: () => void;
         expand: () => void;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        MainButton: {
-          text: string;
-          color: string;
-          textColor: string;
-          isVisible: boolean;
-          isActive: boolean;
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-          showProgress: (leaveActive: boolean) => void;
-          hideProgress: () => void;
-        };
+        // Функция оплаты:
+        openInvoice: (url: string, callback?: (status: string) => void) => void;
+        // Вибрация:
         HapticFeedback: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
         };
-        openInvoice: (url: string, callback?: (status: string) => void) => void;
-        themeParams: any;
       };
     };
   }
 }
 
+// Экспорт объекта WebApp для удобства
 export const tg = window.Telegram?.WebApp;
 
+// Инициализация (расширяем на весь экран)
 export const initTelegram = () => {
   if (tg) {
     tg.ready();
-    tg.expand();
+    try {
+      tg.expand();
+    } catch (e) {
+      console.log('Expand not supported');
+    }
   }
 };
 
+// Вибрация (для приятных ощущений при клике)
 export const hapticImpact = (style: 'light' | 'medium' | 'heavy' = 'light') => {
   if (tg?.HapticFeedback) {
     tg.HapticFeedback.impactOccurred(style);
   }
 };
 
-// Simulation of a payment provider since we don't have a backend to generate real invoices here.
-// In a real app, you would fetch an invoice link from your bot backend.
-export const buyStars = (amount: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    // Simulate network delay
-    setTimeout(() => {
-      // In a real TWA, we would use tg.openInvoice(invoiceLink).
-      // Here we just resolve true for demo purposes.
-      const confirmed = window.confirm(`Подтвердить оплату ${amount} Stars? (Тестовый режим)`);
-      if (confirmed) {
-        if (tg?.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred('success');
-        }
-        resolve(true);
-      } else {
+// --- ГЛАВНАЯ ФУНКЦИЯ ОПЛАТЫ ---
+export const buyStars = async (amount: number, title: string, description: string): Promise<boolean> => {
+  return new Promise(async (resolve) => {
+    
+    // 1. Проверка: если открыто не в Телеграме, оплата не сработает
+    if (!tg || !tg.initData) {
+      alert("Оплата доступна только внутри Telegram!");
+      resolve(false);
+      return;
+    }
+
+    try {
+      // 2. Запрашиваем ссылку на оплату у вашего сервера (Vercel)
+      const response = await fetch('/api/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title,             // Название (напр. "Техника Энергия")
+          description: description, // Описание
+          price: amount             // Цена в звездах
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.link) {
+        console.error("Ошибка: Сервер не вернул ссылку", data);
+        alert("Ошибка создания счета. Попробуйте позже.");
         resolve(false);
+        return;
       }
-    }, 500);
+
+      // 3. Открываем нативное окно оплаты Telegram
+      tg.openInvoice(data.link, (status: string) => {
+        // status может быть 'paid', 'cancelled', 'failed', 'pending'
+        if (status === 'paid') {
+          // Успех! Вибрируем телефоном
+          if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+          resolve(true);
+        } else {
+          // Отмена или ошибка
+          if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+          resolve(false);
+        }
+      });
+
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("Ошибка сети");
+      resolve(false);
+    }
   });
 };
