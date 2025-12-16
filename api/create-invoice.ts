@@ -1,11 +1,26 @@
 
 export default async function handler(req, res) {
-  // 1. Разрешаем только POST запросы
+  // --- CORS HEADERS ---
+  // Разрешаем запросы с любого источника (для WebApp это важно)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Обработка preflight запроса (браузер проверяет доступность сервера)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  // ---------------------
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // 2. Получаем токен из переменных окружения Vercel
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
   if (!TELEGRAM_BOT_TOKEN) {
@@ -16,25 +31,21 @@ export default async function handler(req, res) {
   try {
     const { title, description, price, initData } = req.body;
 
-    // Валидация входных данных
     if (!title || !price) {
       return res.status(400).json({ error: 'Missing title or price' });
     }
 
-    // 3. Формируем запрос к API Телеграма
     const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/createInvoiceLink`;
 
     const invoiceData = {
       title: title,
       description: description || 'Payment for services',
-      payload: `order_${Date.now()}_${Math.random().toString(36).substring(7)}`, // Уникальный ID заказа
-      provider_token: "", // ВАЖНО: Для Telegram Stars этот параметр должен быть пустым!
-      currency: "XTR",    // Валюта для Telegram Stars
+      payload: `order_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      provider_token: "", // Пусто для Telegram Stars
+      currency: "XTR",    // Валюта XTR
       prices: [{ label: title, amount: parseInt(price) }],
-      // Можно добавить валидацию пользователя через initData, если требуется повышенная безопасность
     };
 
-    // 4. Отправляем запрос
     const response = await fetch(telegramApiUrl, {
       method: 'POST',
       headers: {
@@ -50,7 +61,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to create invoice', details: data.description });
     }
 
-    // 5. Возвращаем ссылку на оплату фронтенду
     return res.status(200).json({ invoiceLink: data.result });
 
   } catch (error) {

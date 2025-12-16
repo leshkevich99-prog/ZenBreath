@@ -49,14 +49,20 @@ export const buyStars = async (amount: number, title: string, description: strin
     
     // 1. Environment check
     if (!tg || !tg.initData) {
-      alert("Payment is only available inside Telegram!");
+      // Fallback for development/browser testing without Telegram
+      console.warn("Running outside Telegram. Simulating payment.");
+      if (confirm(`[DEV MODE] Simulate paying ${amount} Stars for "${title}"?`)) {
+          resolve(true);
+          return;
+      }
       resolve(false);
       return;
     }
 
     try {
       // 2. Request Invoice Link from YOUR Backend
-      // The endpoint /api/create-invoice handles the Bot API call securely
+      console.log("Sending request to /api/create-invoice...");
+      
       const response = await fetch('/api/create-invoice', {
         method: 'POST',
         headers: {
@@ -70,18 +76,24 @@ export const buyStars = async (amount: number, title: string, description: strin
         }),
       });
 
+      if (!response.ok) {
+        // Try to read error text
+        const errorText = await response.text();
+        console.error("Backend Error:", response.status, errorText);
+        throw new Error(`Server error ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
 
-      if (!response.ok || !data.invoiceLink) {
-        console.error("Payment API Error:", data);
-        alert("Could not initialize payment. Please try again later.");
+      if (!data.invoiceLink) {
+        console.error("Invalid response format:", data);
+        alert("Server Error: No invoice link returned.");
         resolve(false);
         return;
       }
 
       // 3. Open Telegram Native Invoice
       tg.openInvoice(data.invoiceLink, (status: string) => {
-        // status: 'paid', 'cancelled', 'failed', 'pending'
         console.log(`Invoice status: ${status}`);
         
         if (status === 'paid') {
@@ -92,15 +104,14 @@ export const buyStars = async (amount: number, title: string, description: strin
           alert("Payment failed.");
           resolve(false);
         } else {
-          // Cancelled or Pending
           if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
           resolve(false);
         }
       });
 
-    } catch (error) {
-      console.error("Network Error:", error);
-      alert("Network error. Please check your internet connection.");
+    } catch (error: any) {
+      console.error("Payment Exception:", error);
+      alert(`Connection Error: ${error.message || 'Unknown network error'}`);
       resolve(false);
     }
   });
