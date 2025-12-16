@@ -138,7 +138,6 @@ const App: React.FC = () => {
   };
 
   const handleUnlockRequest = (pattern: BreathingPattern) => {
-    // Double check if already unlocked (UI should prevent this, but good for safety)
     if (userState.unlockedPatternIds.includes(pattern.id)) {
       setCurrentPattern(pattern);
       return;
@@ -147,12 +146,18 @@ const App: React.FC = () => {
     setModalOpen(true);
   };
 
+  // --- ВОТ ТУТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
   const handlePurchase = async () => {
     if (!selectedUnlockPattern) return;
     
     setIsPurchasing(true);
-    // Pass the specific price of the item
-    const success = await buyStars(selectedUnlockPattern.price || 50);
+    
+    // Мы передаем теперь 3 параметра: Цену, Название, Описание
+    const success = await buyStars(
+        selectedUnlockPattern.price || 50,
+        selectedUnlockPattern.name,
+        selectedUnlockPattern.description
+    );
     
     if (success) {
       setUserState(prev => ({
@@ -165,6 +170,7 @@ const App: React.FC = () => {
     }
     setIsPurchasing(false);
   };
+  // --------------------------------
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white flex flex-col font-sans animate-gradient bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
