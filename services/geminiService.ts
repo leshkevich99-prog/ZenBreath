@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { AIAdvice } from "../types";
 
 // NOTE: In a production frontend, never expose API keys directly.
@@ -19,20 +19,31 @@ try {
 export const generateDailyWisdom = async (): Promise<AIAdvice> => {
   if (!genAI) {
     return {
-      text: "Дышите глубоко. Настоящий момент — это всё, что у вас есть.",
-      mood: "Спокойствие"
+      text: "Breathe deeply. The present moment is all you have.",
+      mood: "Calm"
     };
   }
 
   try {
     const model = "gemini-2.5-flash";
-    const prompt = "Сгенерируй короткую, успокаивающую фразу для медитации на русском языке (максимум 20 слов). Верни ответ в формате JSON: { \"text\": \"фраза\", \"mood\": \"настроение\" }";
+    const prompt = "Generate a short, soothing meditation quote or advice in English (max 20 words).";
     
     const response = await genAI.models.generateContent({
       model: model,
       contents: prompt,
       config: {
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            text: {
+              type: Type.STRING,
+            },
+            mood: {
+              type: Type.STRING,
+            },
+          },
+        },
       }
     });
 
@@ -45,8 +56,8 @@ export const generateDailyWisdom = async (): Promise<AIAdvice> => {
   } catch (error) {
     console.error("Gemini API Error:", error);
     return {
-      text: "Сосредоточьтесь на дыхании. Вдохните спокойствие, выдохните стресс.",
-      mood: "Баланс"
+      text: "Focus on your breath. Inhale peace, exhale stress.",
+      mood: "Balance"
     };
   }
 };

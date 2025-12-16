@@ -12,29 +12,29 @@ const PATTERNS: BreathingPattern[] = [
   // FREE PATTERNS
   {
     id: 'basic',
-    name: 'Базовое',
-    description: 'Равномерное дыхание (4-4) для восстановления баланса.',
+    name: 'Basic',
+    description: 'Even breathing (4-4) to restore balance.',
     isPremium: false,
     phases: { inhale: 4, holdIn: 0, exhale: 4, holdOut: 0 }
   },
   {
     id: 'coherence',
-    name: 'Ритм Сердца',
-    description: 'Когерентное дыхание (5-5) для синхронизации сердца и мозга.',
+    name: 'Heart Rhythm',
+    description: 'Coherent breathing (5-5) to sync heart and mind.',
     isPremium: false,
     phases: { inhale: 5, holdIn: 0, exhale: 5, holdOut: 0 }
   },
   {
     id: 'triangle',
-    name: 'Треугольник',
-    description: 'Мягкая концентрация (4-4-4) перед началом работы.',
+    name: 'Triangle',
+    description: 'Soft focus (4-4-4) before starting work.',
     isPremium: false,
     phases: { inhale: 4, holdIn: 4, exhale: 4, holdOut: 0 }
   },
   {
     id: 'calm',
-    name: 'Спокойствие',
-    description: 'Удлиненный выдох (4-6) для мягкого, безопасного расслабления.',
+    name: 'Calm',
+    description: 'Extended exhale (4-6) for soft, safe relaxation.',
     isPremium: false,
     phases: { inhale: 4, holdIn: 0, exhale: 6, holdOut: 0 }
   },
@@ -42,56 +42,56 @@ const PATTERNS: BreathingPattern[] = [
   // PAID PATTERNS
   {
     id: 'energy',
-    name: 'Энергия',
-    description: 'Быстрый ритм (4-2) для мгновенной бодрости. Как эспрессо.',
+    name: 'Energy',
+    description: 'Fast rhythm (4-2) for instant alertness. Like espresso.',
     isPremium: true,
     price: 30,
     phases: { inhale: 4, holdIn: 0, exhale: 2, holdOut: 0 }
   },
   {
     id: 'antistress',
-    name: 'Анти-Стресс',
-    description: 'Длинный выдох мгновенно снижает уровень стресса.',
+    name: 'Anti-Stress',
+    description: 'Long exhale instantly lowers cortisol levels.',
     isPremium: true,
     price: 25,
     phases: { inhale: 4, holdIn: 0, exhale: 8, holdOut: 0 }
   },
   {
     id: 'box',
-    name: 'Квадрат',
-    description: 'Классическая техника "спецназа" для полного контроля.',
+    name: 'Box Breathing',
+    description: 'Classic "Navy SEAL" technique for total control.',
     isPremium: true,
     price: 50,
     phases: { inhale: 4, holdIn: 4, exhale: 4, holdOut: 4 }
   },
   {
     id: 'box_pro',
-    name: 'Квадрат PRO',
-    description: 'Усложненная версия (6-6-6-6) для тренировки легких.',
+    name: 'Box Pro',
+    description: 'Advanced version (6-6-6-6) for lung capacity training.',
     isPremium: true,
     price: 75,
     phases: { inhale: 6, holdIn: 6, exhale: 6, holdOut: 6 }
   },
   {
     id: 'relax',
-    name: '4-7-8 Сон',
-    description: 'Мощная техника доктора Вейла для быстрого засыпания.',
+    name: '4-7-8 Sleep',
+    description: 'Dr. Weil\'s powerful technique for falling asleep fast.',
     isPremium: true,
     price: 75,
     phases: { inhale: 4, holdIn: 7, exhale: 8, holdOut: 0 }
   },
   {
     id: 'deep_focus',
-    name: 'Мастер Дзен',
-    description: 'Продвинутая задержка для глубокой медитации.',
+    name: 'Zen Master',
+    description: 'Advanced retention for deep meditation.',
     isPremium: true,
     price: 100,
     phases: { inhale: 5, holdIn: 5, exhale: 5, holdOut: 5 }
   },
   {
     id: 'pranayama',
-    name: 'Йога (1:4:2)',
-    description: 'Древняя техника (4-16-8) для полного контроля над умом.',
+    name: 'Yogic Breath',
+    description: 'Ancient 1:4:2 ratio (4-16-8) for mind mastery.',
     isPremium: true,
     price: 150,
     phases: { inhale: 4, holdIn: 16, exhale: 8, holdOut: 0 }
@@ -146,13 +146,12 @@ const App: React.FC = () => {
     setModalOpen(true);
   };
 
-  // --- ВОТ ТУТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
   const handlePurchase = async () => {
     if (!selectedUnlockPattern) return;
     
     setIsPurchasing(true);
     
-    // Мы передаем теперь 3 параметра: Цену, Название, Описание
+    // We pass 3 parameters: Price, Name, Description
     const success = await buyStars(
         selectedUnlockPattern.price || 50,
         selectedUnlockPattern.name,
@@ -170,7 +169,6 @@ const App: React.FC = () => {
     }
     setIsPurchasing(false);
   };
-  // --------------------------------
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white flex flex-col font-sans animate-gradient bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
@@ -211,7 +209,7 @@ const App: React.FC = () => {
       <footer className="w-full bg-[#0f172a]/80 backdrop-blur-lg border-t border-white/5 pb-8 pt-4 rounded-t-3xl">
         <div className="px-6 mb-4 flex items-center gap-2">
             <Activity size={16} className="text-cyan-400" />
-            <span className="text-sm font-bold text-slate-200">Выберите технику</span>
+            <span className="text-sm font-bold text-slate-200">Select technique</span>
         </div>
         
         <PatternSelector 

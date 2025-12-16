@@ -7,6 +7,8 @@ declare global {
         initDataUnsafe: any;
         ready: () => void;
         expand: () => void;
+        setHeaderColor: (color: string) => void;
+        setBackgroundColor: (color: string) => void;
         // Функция оплаты:
         openInvoice: (url: string, callback?: (status: string) => void) => void;
         // Вибрация:
@@ -47,7 +49,7 @@ export const buyStars = async (amount: number, title: string, description: strin
     
     // 1. Проверка: если открыто не в Телеграме, оплата не сработает
     if (!tg || !tg.initData) {
-      alert("Оплата доступна только внутри Telegram!");
+      alert("Payment is only available inside Telegram!");
       resolve(false);
       return;
     }
@@ -60,17 +62,17 @@ export const buyStars = async (amount: number, title: string, description: strin
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: title,             // Название (напр. "Техника Энергия")
-          description: description, // Описание
-          price: amount             // Цена в звездах
+          title: title,             // Name (e.g. "Energy Technique")
+          description: description, // Description
+          price: amount             // Price in Stars
         }),
       });
 
       const data = await response.json();
 
       if (!data.link) {
-        console.error("Ошибка: Сервер не вернул ссылку", data);
-        alert("Ошибка создания счета. Попробуйте позже.");
+        console.error("Error: Server did not return link", data);
+        alert("Error creating invoice. Please try again later.");
         resolve(false);
         return;
       }
@@ -91,7 +93,7 @@ export const buyStars = async (amount: number, title: string, description: strin
 
     } catch (error) {
       console.error("Network error:", error);
-      alert("Ошибка сети");
+      alert("Network Error");
       resolve(false);
     }
   });

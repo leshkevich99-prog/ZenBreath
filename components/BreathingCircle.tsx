@@ -12,7 +12,7 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
   const [phase, setPhase] = useState<BreathingPhase>(BreathingPhase.IDLE);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isActive, setIsActive] = useState(false);
-  const [instruction, setInstruction] = useState("Нажмите Старт");
+  const [instruction, setInstruction] = useState("Press Start");
   
   // Use refs for timer logic to avoid stale closures in intervals
   const patternRef = useRef(pattern);
@@ -39,11 +39,11 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
 
   const getInstruction = (p: BreathingPhase): string => {
     switch (p) {
-      case BreathingPhase.INHALE: return "Вдох";
-      case BreathingPhase.HOLD_IN: return "Задержка";
-      case BreathingPhase.EXHALE: return "Выдох";
-      case BreathingPhase.HOLD_OUT: return "Задержка";
-      default: return "Готовы?";
+      case BreathingPhase.INHALE: return "Inhale";
+      case BreathingPhase.HOLD_IN: return "Hold";
+      case BreathingPhase.EXHALE: return "Exhale";
+      case BreathingPhase.HOLD_OUT: return "Hold";
+      default: return "Ready?";
     }
   };
 
@@ -74,7 +74,7 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
     setIsActive(false);
     setPhase(BreathingPhase.IDLE);
     phaseRef.current = BreathingPhase.IDLE;
-    setInstruction("Нажмите Старт");
+    setInstruction("Press Start");
     setTimeLeft(0);
   };
 
@@ -156,14 +156,14 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
             onClick={startSession}
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white px-8 py-3 rounded-full backdrop-blur-md border border-white/10 font-medium"
           >
-            <Play size={20} fill="currentColor" /> Начать
+            <Play size={20} fill="currentColor" /> Start
           </button>
         ) : (
           <button 
             onClick={stopSession}
             className="flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 active:scale-95 transition-all text-red-100 px-8 py-3 rounded-full backdrop-blur-md border border-red-500/30 font-medium"
           >
-            <Pause size={20} fill="currentColor" /> Стоп
+            <Pause size={20} fill="currentColor" /> Stop
           </button>
         )}
       </div>
