@@ -31,8 +31,23 @@ const PATTERNS: BreathingPattern[] = [
     isPremium: false,
     phases: { inhale: 4, holdIn: 4, exhale: 4, holdOut: 0 }
   },
+  {
+    id: 'calm',
+    name: 'Спокойствие',
+    description: 'Удлиненный выдох (4-6) для мягкого, безопасного расслабления.',
+    isPremium: false,
+    phases: { inhale: 4, holdIn: 0, exhale: 6, holdOut: 0 }
+  },
   
   // PAID PATTERNS
+  {
+    id: 'energy',
+    name: 'Энергия',
+    description: 'Быстрый ритм (4-2) для мгновенной бодрости. Как эспрессо.',
+    isPremium: true,
+    price: 30,
+    phases: { inhale: 4, holdIn: 0, exhale: 2, holdOut: 0 }
+  },
   {
     id: 'antistress',
     name: 'Анти-Стресс',
@@ -50,6 +65,14 @@ const PATTERNS: BreathingPattern[] = [
     phases: { inhale: 4, holdIn: 4, exhale: 4, holdOut: 4 }
   },
   {
+    id: 'box_pro',
+    name: 'Квадрат PRO',
+    description: 'Усложненная версия (6-6-6-6) для тренировки легких.',
+    isPremium: true,
+    price: 75,
+    phases: { inhale: 6, holdIn: 6, exhale: 6, holdOut: 6 }
+  },
+  {
     id: 'relax',
     name: '4-7-8 Сон',
     description: 'Мощная техника доктора Вейла для быстрого засыпания.',
@@ -64,6 +87,14 @@ const PATTERNS: BreathingPattern[] = [
     isPremium: true,
     price: 100,
     phases: { inhale: 5, holdIn: 5, exhale: 5, holdOut: 5 }
+  },
+  {
+    id: 'pranayama',
+    name: 'Йога (1:4:2)',
+    description: 'Древняя техника (4-16-8) для полного контроля над умом.',
+    isPremium: true,
+    price: 150,
+    phases: { inhale: 4, holdIn: 16, exhale: 8, holdOut: 0 }
   }
 ];
 
@@ -72,7 +103,7 @@ const App: React.FC = () => {
   
   // Initialize with all free patterns unlocked
   const [userState, setUserState] = useState<UserState>({ 
-    unlockedPatternIds: ['basic', 'coherence', 'triangle'], 
+    unlockedPatternIds: ['basic', 'coherence', 'triangle', 'calm'], 
     starsBalance: 0 
   });
   
