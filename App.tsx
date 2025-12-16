@@ -171,45 +171,43 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col font-sans animate-gradient bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
+    // Changed min-h-screen to h-screen and added overflow-hidden to fit perfectly
+    <div className="h-screen w-full overflow-hidden bg-[#0f172a] text-white flex flex-col font-sans animate-gradient bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
       
-      {/* Header */}
-      <header className="px-6 py-6 flex justify-between items-center">
+      {/* Header - Compact padding */}
+      <header className="shrink-0 px-4 py-3 flex justify-between items-center z-10">
         <div>
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
             ZenBreath
             </h1>
-            <p className="text-xs text-slate-400">Telegram Stars Edition</p>
         </div>
         {aiAdvice && (
-            <div className="bg-white/5 border border-white/10 rounded-full px-3 py-1 text-xs text-cyan-200 flex items-center gap-2">
-                <Sparkles size={12} /> {aiAdvice.mood}
+            <div className="bg-white/5 border border-white/10 rounded-full px-2 py-1 text-[10px] text-cyan-200 flex items-center gap-1">
+                <Sparkles size={10} /> {aiAdvice.mood}
             </div>
         )}
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow flex flex-col items-center relative">
+      {/* Main Content - Flex-1 to take available space, center content */}
+      <main className="flex-1 flex flex-col items-center justify-center relative overflow-hidden w-full">
         
-        {/* AI Quote */}
+        {/* AI Quote - Reduced margins */}
         {aiAdvice && (
-            <div className="px-8 text-center mb-4 animate-pulse">
-                <p className="text-slate-300 italic text-sm">"{aiAdvice.text}"</p>
+            <div className="px-6 text-center mb-2 absolute top-4 w-full">
+                <p className="text-slate-300 italic text-xs opacity-70">"{aiAdvice.text}"</p>
             </div>
         )}
 
-        {/* Breathing Circle */}
-        <div className="flex-grow flex items-center">
-            <BreathingCircle pattern={currentPattern} />
-        </div>
+        {/* Breathing Circle - Centered */}
+        <BreathingCircle pattern={currentPattern} />
 
       </main>
 
-      {/* Footer / Controls */}
-      <footer className="w-full bg-[#0f172a]/80 backdrop-blur-lg border-t border-white/5 pb-8 pt-4 rounded-t-3xl">
-        <div className="px-6 mb-4 flex items-center gap-2">
-            <Activity size={16} className="text-cyan-400" />
-            <span className="text-sm font-bold text-slate-200">Select technique</span>
+      {/* Footer / Controls - Compact padding */}
+      <footer className="shrink-0 w-full bg-[#0f172a]/80 backdrop-blur-lg border-t border-white/5 pb-6 pt-2 rounded-t-2xl z-20">
+        <div className="px-4 mb-2 flex items-center gap-2">
+            <Activity size={14} className="text-cyan-400" />
+            <span className="text-xs font-bold text-slate-200">Select technique</span>
         </div>
         
         <PatternSelector 

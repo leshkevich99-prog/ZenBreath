@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BreathingPhase, BreathingPattern } from '../types';
 import { hapticImpact } from '../services/telegramService';
-import { Play, Pause, RefreshCw } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 
 interface BreathingCircleProps {
   pattern: BreathingPattern;
@@ -14,15 +14,13 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
   const [isActive, setIsActive] = useState(false);
   const [instruction, setInstruction] = useState("Press Start");
   
-  // Use refs for timer logic to avoid stale closures in intervals
   const patternRef = useRef(pattern);
   const phaseRef = useRef(BreathingPhase.IDLE);
 
-  // Update ref when prop changes
   useEffect(() => {
     patternRef.current = pattern;
     if (isActive) {
-        stopSession(); // Reset if pattern changes mid-session
+        stopSession(); 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pattern]);
@@ -85,7 +83,6 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            // Phase transition
             const next = nextPhase(phaseRef.current);
             setPhase(next);
             phaseRef.current = next;
@@ -101,17 +98,7 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
     return () => clearInterval(interval);
   }, [isActive]);
 
-  // Determine scale and color based on phase for animation
   const getCircleStyle = () => {
-    let scale = 'scale-100';
-    let opacity = 'opacity-80';
-    
-    if (phase === BreathingPhase.INHALE) scale = 'scale-150';
-    if (phase === BreathingPhase.HOLD_IN) scale = 'scale-150'; // Stay expanded
-    if (phase === BreathingPhase.EXHALE) scale = 'scale-100';
-    if (phase === BreathingPhase.HOLD_OUT) scale = 'scale-100'; // Stay contracted
-
-    // Dynamic duration based on current phase time
     const duration = phase === BreathingPhase.IDLE ? 500 : getPhaseDuration(phase) * 1000;
     
     return {
@@ -121,7 +108,8 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-10">
+    // Removed fixed py-10, added flex-1 to fill available space
+    <div className="flex-1 flex flex-col items-center justify-center w-full">
       <div className="relative w-64 h-64 flex items-center justify-center">
         {/* Animated Background Circle */}
         <div 
@@ -133,10 +121,9 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
           className="w-40 h-40 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 shadow-[0_0_40px_rgba(56,189,248,0.5)] flex items-center justify-center z-10"
           style={getCircleStyle()}
         >
-          {/* Inner Text (Doesn't scale with parent to remain readable, so we counter-scale or just put it on top) */}
         </div>
 
-        {/* Text Overlay - Centered Absolute */}
+        {/* Text Overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
           <span className="text-2xl font-bold text-white drop-shadow-md tracking-widest uppercase">
             {instruction}
@@ -149,8 +136,8 @@ const BreathingCircle: React.FC<BreathingCircleProps> = ({ pattern }) => {
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="mt-12 flex gap-6">
+      {/* Controls - Reduced margin mt-12 -> mt-6 */}
+      <div className="mt-6 flex gap-6 z-30">
         {!isActive ? (
           <button 
             onClick={startSession}
